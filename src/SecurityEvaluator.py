@@ -121,16 +121,16 @@ def compute_multitargetfix1_MTTSF(harm):
     """
     MTTSF = 0
     break_flag = False
-    model = "disjunction"
     #rebuild multi target attack path
     harm.model.calcMTTC()
     shuffle(harm.model.allpath)
 
     for path in harm.model.allpath:
-        
-#         for node in path:
-#             print(node.name)
-#         print("-----------------------------------------------")
+        str1 = ""
+        for node in path:
+            str1 = str1 + "->" +node.name
+        print(str1)
+        print("-----------------------------------------------")
         for node in path:
             if node is not harm.model.s and node is not harm.model.e:
                 if node.val > 0 and node.comp == False:
@@ -160,9 +160,11 @@ def compute_multitargetfix2_MTTSF(harm):
     shuffle(harm.model.allpath)
 
     for path in harm.model.allpath:
-#         for node in path:
-#             print(node.name+" "+str(node.target))
-#         print("-----------------------------------------------")
+        str1 = ""
+        for node in path:
+            str1 = str1 + "->" +node.name
+        print(str1)
+        print("-----------------------------------------------")
         for node in path:      
             if node is not harm.model.s:
                 if node.val > 0 and node.comp == False:
@@ -200,9 +202,11 @@ def compute_multitargetdynamic_MTTSF(harm):
     harm.model.calcMTTC()
     shuffle(harm.model.allpath)
     for path in harm.model.allpath:
-#         for node in path:
-#             print(node.name+" "+str(node.target))
-#         print("-----------------------------------------------")
+        str1 = ""
+        for node in path:
+            str1 = str1 + "->" +node.name
+        print(str1)
+        print("-----------------------------------------------")
         for node in path:     
             if node is not harm.model.s and node is not harm.model.e:
                 if node.val > 0 and node.comp == False:

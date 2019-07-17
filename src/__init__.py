@@ -3,14 +3,14 @@ import json
 import attackTree
 def parse_solution_set(net, solution_set):
     
-    ct_num, camera_num, tv_num, server_num = add_solution_set(solution_set)#number of decoynodes
+    laptop_num, thermostat_num, tv_num, server_num = add_solution_set(solution_set)#number of decoynodes
     iot_num = getIoTNum(net) #IoT numbe except "server"
-    decoy_iot_num = ct_num + camera_num + tv_num
+    decoy_iot_num = laptop_num + thermostat_num + tv_num
     
-    info = {"diot_dimension": ct_num + camera_num + tv_num,  # number of decoy node indicating the scale of the decoys
+    info = {"diot_dimension": laptop_num + thermostat_num + tv_num,  # number of decoy node indicating the scale of the decoys
             "dserver_dimension": server_num,    #number of decoy servers
-            "decoy_list": ["decoy_ct", "decoy_camera", "decoy_tv", "decoy_server"],  #list of decoy node name 
-            "decoy_num": [ct_num, camera_num, tv_num, server_num],  #number of decoy nodes
+            "decoy_list": ["decoy_laptop", "decoy_thermostat", "decoy_tv", "decoy_server"],  #list of decoy node name 
+            "decoy_num": [laptop_num, thermostat_num, tv_num, server_num],  #number of decoy nodes
             "attackerIntelligence": {'emulated': 0.9, 'real': 1.0}, 
             #indicate the probability of the attacker to proceed using the decoy 
             #(distinguished by node type for this moment emulated 0.9 and real 1
@@ -29,8 +29,8 @@ def parse_solution_set(net, solution_set):
 
 
 if __name__ == '__main__':
-    num = {"ct":2, "camera":2, "tv":2, "server":1}  #number of decoy nodes
-    solution_set = {'ct':num["ct"], 'camera':num["camera"], 'tv':num["tv"], 'server':num["server"]}
+    num = {"laptop":2, "thermostat":2, "tv":2, "server":1}  #number of decoy nodes
+    solution_set = {'laptop':num["laptop"], 'thermostat':num["thermostat"], 'tv':num["tv"], 'server':num["server"]}
     node_vlan_list = [['mri000', 'ct'], ['thermostat', 'meter', 'camera'], ['tv', 'laptop'], ['server1']]
     net = createRealSDIoT(node_vlan_list)
     info = parse_solution_set(net, solution_set)

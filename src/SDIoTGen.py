@@ -115,7 +115,7 @@ def createRealSDIoT(node_vlan_list):
 return number of decoy nodes
 """
 def add_solution_set(solution_set):
-    return solution_set['ct'], solution_set['camera'], solution_set['tv'], solution_set['server']
+    return solution_set['laptop'], solution_set['thermostat'], solution_set['tv'], solution_set['server']
 """
 return number of real nodes
 """

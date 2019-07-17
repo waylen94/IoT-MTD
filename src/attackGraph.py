@@ -176,7 +176,6 @@ class ag(network):
     multi_cunt = 0 #calculate whether attacker achieve attack success
     
     def travelAgRecursive_multitarget_conjunction(self, u, path):
-        
         val = 0  
         for v in u.con:
             #Only include nodes with vulnerabilities in the path
@@ -185,10 +184,10 @@ class ag(network):
                 self.path.append(v)
                 v.inPath = 1
                 str1 = ""
-#                 for node in path:
-#                     str1 = str1 + "-"+ node.name 
-#                 print(str1)
-#                 print(v.name+ str(v.id)+"----------------------------------------")
+                for node in path:
+                    str1 = str1 + node.name + "->" 
+                print(str1)
+                print("----------------------------------------")
                 if v.target != True and v.id != 106:             
                     val += self.travelAgRecursive_multitarget_conjunction(v,self.path)
                 elif v.id == 106: #in this moment id == 106 represent decoy server

@@ -15,14 +15,14 @@ from attackTree import *
 
 def parse_solution_set(net, solution_set):
     
-    ct_num, camera_num, tv_num, server_num = add_solution_set(solution_set)#number of decoynodes
+    laptop_num, thermostat_num, tv_num, server_num = add_solution_set(solution_set)#number of decoynodes
     iot_num = getIoTNum(net) #IoT numbe except "server"
-    decoy_iot_num = ct_num + camera_num + tv_num
+    decoy_iot_num = laptop_num + thermostat_num + tv_num
     
-    info = {"diot_dimension": ct_num + camera_num + tv_num,  # number of decoy node indicating the scale of the decoys
+    info = {"diot_dimension": laptop_num + thermostat_num + tv_num,  # number of decoy node indicating the scale of the decoys
             "dserver_dimension": server_num,    #number of decoy servers
-            "decoy_list": ["decoy_ct", "decoy_camera", "decoy_tv", "decoy_server"],  #list of decoy node name 
-            "decoy_num": [ct_num, camera_num, tv_num, server_num],  #number of decoy nodes
+            "decoy_list": ["decoy_laptop", "decoy_thermostat", "decoy_tv", "decoy_server"],  #list of decoy node name 
+            "decoy_num": [laptop_num, thermostat_num, tv_num, server_num],  #number of decoy nodes
             "attackerIntelligence": {'emulated': 0.9, 'real': 1.0}, 
             #indicate the probability of the attacker to proceed using the decoy 
             #(distinguished by node type for this moment emulated 0.9 and real 1
@@ -96,7 +96,7 @@ def beforeShuffle(num, file_name,model):
     #Create a real network list of IoT nodes
     node_vlan_list = [['mri', 'ct'], ['thermostat', 'meter', 'camera'], ['tv', 'laptop'], ['server1']]
     #list of decoy nodes such as {name:number} => {'ct':2}
-    solution_set = {'ct':num["ct"], 'camera':num["camera"], 'tv':num["tv"], 'server':num["server"]}
+    solution_set = {'laptop':num["laptop"], 'thermostat':num["thermostat"], 'tv':num["tv"], 'server':num["server"]}
     #create real IoT network
     net = createRealSDIoT(node_vlan_list)
     #printNet(net)
@@ -198,13 +198,12 @@ def adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, file_name, mod
  
 if __name__ == '__main__':
     
-    
     multitarget_model = "conjunction"
-#     multitarget_model = "disjunction"
+    #multitarget_model = "disjunction"
     #multitarget_model = "dynamic"
 
 
-    num = {"ct":2, "camera":2, "tv":2, "server":1}  #number of decoy nodes
+    num = {"thermostat":2, "laptop":2, "tv":2, "server":1}  #number of decoy nodes
     #initiate network, decoy net, initial information
     initial_net, decoy_net, decoy_list, initial_info = beforeShuffle(num, "init_decoy_net_metrics",multitarget_model)
     
