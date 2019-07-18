@@ -26,6 +26,7 @@ class node(object):
         #working for multi target scenario 
         self.target = False
         self.id = 550 #initial for start and end testing
+        self.score = 0 #vulnerability base score for multi target dynamic testing
 
     #Set the node as normal/start/end
     def setStart(self):

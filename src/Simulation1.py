@@ -29,7 +29,7 @@ def parse_solution_set(net, solution_set):
             "threshold": float(1.0/3.0), #indication for security analysis such as MTTSF 
             "server_decoy_type": "real", #indicate the decoy server node type
             "riot_num": iot_num, #real node number
-            "sslThreshold": 0.5, 
+            "sslThreshold": 0.3, 
             #especially for adaptive interval function explanation: when the next time shuffling SSL value larger than the devised sslThreshold then stop, which means SFC have been reached
             "weights": [0.5, 0.5],#for GA runcase especially for normalization value
             "previous_solution": [0] * ((decoy_iot_num + server_num) * iot_num), #storing previous_solution for GA based network topology optimization procedure
@@ -67,8 +67,6 @@ def cacluateMetrics(initial_net, net, initial_info,model):
         h.model.travelAg_multitarget(model) 
         
 #     h.model.printPath()
-    
-    
     #print attack graph network
     #h.model.printAG()
     #h.model.tree_AGAT_print()
@@ -77,8 +75,6 @@ def cacluateMetrics(initial_net, net, initial_info,model):
     
     #initiate expected_mttsf
     expected_mttsf = 0.0
-    
-    
     for i in range(0, initial_info["simulation"]):
         #expected_mttsf += computeMTTSF(h, initial_net, initial_info["threshold"])
         expected_mttsf += computerMTTSF_multitarget(h, initial_net, initial_info["threshold"],model)
@@ -129,9 +125,7 @@ def fixIntervalRS(initial_net, decoy_net, initial_info, interval, pro, file_name
         defense_cost = cost/interval
         #print("Shuffled net:")
         #printNet(shuffled_net)
-        
         dpath, average_expected_mttsf = cacluateMetrics(initial_net, shuffled_net, initial_info,model)
-        
         total_dp += dpath
         total_mtssf += average_expected_mttsf
         total_dc += defense_cost
@@ -154,30 +148,47 @@ def adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, file_name, mod
 
     newnet = copyNet(decoy_net)
     newnet = add_attacker(newnet)
-    h = constructHARM(newnet) 
+    h = constructHARM(newnet)
+    
+    if model =='conjunction':
+        h.model.travelAg_multitarget(model)
+    elif model == 'disjunction':
+        h.model.travelAg_multitarget(model)  
+    else:
+        h.model.travelAg_multitarget(model) 
     previous_ssl = 0
+    
     compNodes = []
     totalMTTC = 0.0
     #Attacker compromises nodes
     #Shuffle network when SSL check threshold is met 
     #Stop when either SF1 or SF2 or SSL threshold is met
     
-    while previous_ssl < initial_info["sslThreshold"]:
-        ssl, mttc, compNodes, new_decoy_net = computeSSL(h, initial_net, decoy_net, initial_info["sslThreshold"], initial_info["sslThreshold_checkInterval"], 
+    while (model == "conjunction" and previous_ssl <2) or (model == "disjunction" and previous_ssl < 3) or (model == "dynamic" and previous_ssl < 0.5):
+        if model =='conjunction':
+            ssl, mttc, compNodes, new_decoy_net = computeSSL_multi_conjunction(h, initial_net, decoy_net, initial_info["sslThreshold"], initial_info["sslThreshold_checkInterval"], 
+                               initial_info["threshold"], initial_info["detectionPro"], 
+                               initial_info["weights"][0], initial_info["weights"][1], 
+                               previous_ssl, compNodes)
+        elif model == 'disjunction':
+            ssl, mttc, compNodes, new_decoy_net = computeSSL_multi_disjunction(h, initial_net, decoy_net, initial_info["sslThreshold"], initial_info["sslThreshold_checkInterval"], 
+                               initial_info["threshold"], initial_info["detectionPro"], 
+                               initial_info["weights"][0], initial_info["weights"][1], 
+                               previous_ssl, compNodes) 
+        else:
+            ssl, mttc, compNodes, new_decoy_net = computeSSL_multi_dynamic(h, initial_net, decoy_net, initial_info["sslThreshold"], initial_info["sslThreshold_checkInterval"], 
                                initial_info["threshold"], initial_info["detectionPro"], 
                                initial_info["weights"][0], initial_info["weights"][1], 
                                previous_ssl, compNodes)
         
         totalMTTC += mttc
-        if ssl < initial_info["sslThreshold"]:
+        
+        
+        if (model == "conjunction" and ssl <2) or (model == "disjunction" and ssl < 3) or (model == "dynamic" and ssl < 0.5):
             shuffled_net, cost = randomShuffling(new_decoy_net, pro)
             
             defense_cost = cost/mttc
-            print("Shuffled net:")
-            printNetWithVul(shuffled_net)
-            
-            
-            
+
             dpath, average_expected_mttsf = cacluateMetrics(initial_net, shuffled_net, initial_info, model)
             
             print([str(dpath), str(average_expected_mttsf), str(defense_cost)])
@@ -193,6 +204,7 @@ def adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, file_name, mod
             h = constructHARM(newnet)                           
         
         previous_ssl = ssl
+        
     return None
 
  

@@ -49,15 +49,19 @@ def add_vul(net):
         if 'mri' in node.name or 'ct' in node.name:
             #https://nvd.nist.gov/vuln/detail/CVE-2018-8308
             #Exploitability score: 6.8
+            node.score = 6.8
             createVulsWithoutType(node, 0.006, 1, "CVE-2018-8308") 
         elif 'thermostat' in node.name:
             #https://nvd.nist.gov/vuln/detail/CVE-2013-4860
+            node.score = 6
             createVulsWithoutType(node, 0.006, 1, "CVE-2013-4860")
         elif 'meter' in node.name:
             #https://nvd.nist.gov/vuln/detail/CVE-2017-9944
             #Exploitability score: 10.0
+            node.score = 10
             createVulsWithoutType(node, 0.042, 1, "CVE-2017-9944")     
         elif 'camera' in node.name:
+            node.score = 10
             #https://nvd.nist.gov/vuln/detail/CVE-2018-10660
             createVulsWithoutType(node, 0.042, 1, "CVE-2018-10660")     
         elif 'tv' in node.name:
@@ -65,10 +69,12 @@ def add_vul(net):
             #Exploitability score: 8.6
             createVulsWithoutType(node, 0.012, 1, "CVE-2018-4094")
         elif 'laptop' in node.name:
+            node.score = 4.9
             #https://nvd.nist.gov/vuln/detail/CVE-2018-8345
             #Exploitability score: 4.9
             createVulsWithoutType(node, 0.004, 1, "CVE-2018-8345")     
         elif 'server' in node.name:
+            node.score = 7
             #https://nvd.nist.gov/vuln/detail/CVE-2018-8273
             createVulsWithoutType(node, 0.006, 1, "CVE-2018-8273")                  
 
@@ -172,6 +178,7 @@ def add_decoy_vul(node):
         #https://nvd.nist.gov/vuln/detail/CVE-2018-8136
         #Score: 8.6
         createVulsWithoutType(node, 0.012, 1, "CVE-2018-8136")
+        node.score = 8.6
         thresholdPri(node, 1)
         terminalPri(node, 1)
     elif 'camera' in node.name:
@@ -179,17 +186,20 @@ def add_decoy_vul(node):
         #Score: 10.0
         createVulsWithoutType(node, 0.042, 1, "CVE-2018-6294")  
         createVulsWithoutType(node, 0.042, 1, "CVE-2018-6295") 
-        createVulsWithoutType(node, 0.042, 1, "CVE-2018-6297") 
+        createVulsWithoutType(node, 0.042, 1, "CVE-2018-6297")
+        node.score = 10 
         thresholdPri(node, 1)
         terminalPri(node, 1)
     elif 'tv' in node.name:
         createVulsWithoutType(node, 0.012, 1, "CVE-2018-4094")   
-        createVulsWithoutType(node, 0.012, 1, "CVE-2018-4095")  
+        createVulsWithoutType(node, 0.012, 1, "CVE-2018-4095")
+        node.score = 8.0  
         thresholdPri(node, 1)
         terminalPri(node, 1)   
     elif 'server' in node.name:
         #https://nvd.nist.gov/vuln/detail/CVE-2016-1930
         #Score: 10.0
+        node.score = 10
         createVulsWithoutType(node, 0.042, 1, "CVE-2016-1930")    
         createVulsWithoutType(node, 0.012, 1, "CVE-2016-1935") 
         createVulsWithoutType(node, 0.042, 1, "CVE-2016-1962")
@@ -199,6 +209,7 @@ def add_decoy_vul(node):
         
         #https://nvd.nist.gov/vuln/detail/CVE-2008-3175
         #Score： 10.0
+        node.score = 10
         createVulsWithoutType(node, 0.042, 1, "CVE-2008-3175")
         createVulsWithoutType(node, 0.042, 1, "CVE-2007-5003")
         #https://nvd.nist.gov/vuln/detail/CVE-2018-8345
@@ -207,11 +218,12 @@ def add_decoy_vul(node):
         thresholdPri(node, 1)
         terminalPri(node, 1)
     elif 'thermostat' in node.name:
+        node.score = 5
         #https://nvd.nist.gov/vuln/detail/CVE-2013-4860
         createVulsWithoutType(node, 0.006, 1, "CVE-2013-4860")
         
-        createVulsWithoutType(node, 0.003, 1, "CVE-2018-11315")
-        createVulsWithoutType(node, 0.002, 1, "CVE-2018-3201")
+        createVulsWithoutType(node, 0.004, 1, "CVE-2018-11315")
+        createVulsWithoutType(node, 0.004, 1, "CVE-2018-3201")
 
         thresholdPri(node, 1)
         terminalPri(node, 1)

@@ -208,9 +208,9 @@ def compute_multitargetdynamic_MTTSF(harm):
                     #multi target area (accumulation)    
                     MTTSF += MTTC
                     if node.type == True: #only evaluating the compromising degree of real nodel
-                        total_val += node.val
+                        total_val += node.score
                     #print(float(totalCount/totalNo))
-                    if total_val >= 0.4:
+                    if total_val >= 15:
                         break_flag = True
                         break
             #Exit outer loop
@@ -228,13 +228,11 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
     harm.model.calcMTTC()
     shuffle(harm.model.allpath)  
     #harm.model.printPath()
-    #print("number of attack paths:", len(harm.model.allpath)) 
-        
+    #print("number of attack paths:", len(harm.model.allpath))   
     totalCount = 0
     totalTime = 0
     neighbor_list = computeNeighbors(net)
     neighborNo = len(neighbor_list)
-    print("Neighbor list: ", [i.name for i in neighbor_list])
     break_flag = False
     for path in harm.model.allpath:
         for node in path:
@@ -245,14 +243,8 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
                     assignCompNodeInNet(decoy_net, node)
                     totalTime += MTTC
                     totalCount += 1
-                    print("SF1: ", float(totalCount/totalNo))
-                    print("SF2: ", flag)
                     compNeighborNo = checkNeighbors(compNodes, neighbor_list)
-                    print("SF11111: ", len(compNodes)/totalNo)
-                    print("SF22222: ", compNeighborNo/neighborNo)
-                    
                     SSL = w1 * (len(compNodes)/totalNo) + w2 * (compNeighborNo/neighborNo)
-                    print("SSL: ", SSL)
                     #Exit inner loop
                     if float(totalCount/totalNo) >= cflag or flag == True:
                         SSL = 1.0
@@ -266,8 +258,133 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
                         break
         #Exit outer loop
         if break_flag == True:
-            break
-    print("MTTC: ", totalTime)          
+            break      
+    return SSL, totalTime, compNodes, decoy_net
+
+def computeSSL_multi_conjunction(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2, previous_ssl, compNodes):
+    """
+    h, 
+    initial_net, 
+    decoy_net, 
+    initial_info["sslThreshold"],  0.5
+    initial_info["sslThreshold_checkInterval"],  0.01
+    initial_info["threshold"],  1/3
+    initial_info["detectionPro"],  0.95
+    initial_info["weights"][0], 0.5
+    initial_info["weights"][1], 0.5
+    previous_ssl, 
+    compNodes
+    
+    conjunction ssl: the number of compromised target nodes
+    
+    Compute system security level.
+    """
+    
+    #print(totalNo)
+    #Calculate the MTTC for each node on the attack path
+    harm.model.calcMTTC()
+    shuffle(harm.model.allpath)  
+    #harm.model.printPath()
+    #print("number of attack paths:", len(harm.model.allpath))   
+    totalTime = 0
+    SSL = 0
+    break_flag = False
+    for path in harm.model.allpath:
+        for node in path:
+            if node is not harm.model.s and node is not harm.model.e:
+                if node.val > 0 and node.comp == False and node.target == True and node.type == True:
+                    
+                    MTTC, flag = computeCompNodes(node, detect_pro) 
+                    compNodes.append(node)
+                    print(len(compNodes))
+                    assignCompNodeInNet(decoy_net, node)
+                    totalTime += MTTC
+                    SSL = len(compNodes)/3
+                    #Exit inner loop
+                    if SSL >= 1/3:
+                        break_flag = True
+                        
+                        break
+#                     elif (SSL - previous_ssl) > thre_check and SSL < thre:
+#                         break_flag = True
+#                         break
+        #Exit outer loop
+        if break_flag == True:
+            break      
+    return SSL, totalTime, compNodes, decoy_net
+
+def computeSSL_multi_disjunction(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2, previous_ssl, compNodes):
+    """
+    Compute system security level.
+    """
+    totalNo = len(net.nodes)
+    #print(totalNo)
+    #Calculate the MTTC for each node on the attack path
+    harm.model.calcMTTC()
+    shuffle(harm.model.allpath)  
+    #harm.model.printPath()
+    #print("number of attack paths:", len(harm.model.allpath))   
+    totalCount = 0
+    totalTime = 0
+    neighbor_list = computeNeighbors(net)
+    neighborNo = len(neighbor_list)
+    break_flag = False
+    for path in harm.model.allpath:
+        for node in path:
+            if node is not harm.model.s and node is not harm.model.e:
+                if node.val > 0 and node.comp == False and node.type == True:
+                    MTTC, flag = computeCompNodes(node, detect_pro) 
+                    compNodes.append(node)
+                    assignCompNodeInNet(decoy_net, node)
+                    totalTime += MTTC
+                    totalCount += 1
+                    compNeighborNo = checkNeighbors(compNodes, neighbor_list)
+                    SSL = compNeighborNo/neighborNo
+                    #Exit inner loop
+                    if SSL >= 1/3:
+                        break_flag = True
+                        break
+#                     elif (SSL - previous_ssl) > thre_check and SSL < thre:
+#                         break_flag = True
+#                         break
+        #Exit outer loop
+        if break_flag == True:
+            break      
+    return SSL, totalTime, compNodes, decoy_net
+
+def computeSSL_multi_dynamic(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2, previous_ssl, compNodes):
+    """
+    Compute system security level.
+    """
+    #print(totalNo)
+    #Calculate the MTTC for each node on the attack path
+    harm.model.calcMTTC()
+    shuffle(harm.model.allpath)  
+    #harm.model.printPath()
+    #print("number of attack paths:", len(harm.model.allpath))   
+    totalCount = 0
+    totalTime = 0
+    break_flag = False
+    for path in harm.model.allpath:
+        for node in path:
+            if node is not harm.model.s and node is not harm.model.e:
+                if node.val > 0 and node.comp == False and node.type == True:
+                    MTTC, flag = computeCompNodes(node, detect_pro) 
+                    compNodes.append(node)
+                    assignCompNodeInNet(decoy_net, node)
+                    totalTime += MTTC
+                    totalCount += node.val
+                    SSL = totalCount
+                    #Exit inner loop
+                    if SSL >= 0.01:
+                        break_flag = True
+                        break
+#                     elif (SSL - previous_ssl) > thre_check and SSL < thre:
+#                         break_flag = True
+#                         break
+        #Exit outer loop
+        if break_flag == True:
+            break      
     return SSL, totalTime, compNodes, decoy_net
     
 #---------------------------------------------------------------------------------------------------
@@ -281,21 +398,19 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
 def computeCompNodes(node, detect_pro):
     flag = False #SF2
     
-    print("Compromised node: ", node.name, node.type, node.val)
+    #print("Compromised node: ", node.name, node.type, node.val)
     if node.type == True:
         node.comp = True
-        if node.critical == True:
-            flag = True
         MTTC = (1.0/node.val) * node.pro - node.prev_comp
     else:
         #node.comp = True
         MTTC = (1.0/node.val) * node.pro * detect_pro
-    print("MTTC: ", MTTC)  
+    #print("MTTC: ", MTTC)  
     return MTTC, flag 
 
 def assignCompNodeInNet(decoy_net, attack_node):
     for node in decoy_net.nodes:
         if attack_node.name == "ag_"+node.name:
-            print("Assign compromised node in original net: ", node.name, attack_node.name)
+            #print("Assign compromised node in original net: ", node.name, attack_node.name)
             node.comp = True
     return None

@@ -124,12 +124,11 @@ def removeNodeFromList(node, con_list):
 def computeNeighbors(net):
     """
     Compute 1-hop neighbors.
-    Do not exclude redundant neighbor nodes yet.
     """
     neighbor_list = []
     for node in net.nodes:
         for conNode in node.con:
-            if conNode.critical == True:
+            if conNode.target == True and conNode not in neighbor_list:
                 neighbor_list.append(node)
     return neighbor_list
 
@@ -139,5 +138,5 @@ def checkNeighbors(compNodes, neighbor_list):
         for neighbor in neighbor_list:
             if node.name == "ag_"+neighbor.name:
                 compNo += 1
-    print("Number of compromised neighbors: ", compNo)
+    #print("Number of compromised neighbors: ", compNo)
     return compNo
