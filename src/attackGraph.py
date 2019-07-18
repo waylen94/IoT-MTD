@@ -173,7 +173,8 @@ class ag(network):
     3.dynamic target model 
     """
     multi_num = 2 #in conjunction scenario all 2 nodes compromised representing attack success
-    multi_cunt = 0 #calculate whether attacker achieve attack success
+    multi_cunt_real = 0 #calculate whether attacker achieve attack success
+    multi_cunt_decoy = 0
     
     def travelAgRecursive_multitarget_conjunction(self, u, path):
         val = 0  
@@ -188,25 +189,26 @@ class ag(network):
                     str1 = str1 + node.name + "->" 
                 print(str1)
                 print("----------------------------------------")
-                if v.target != True and v.id != 106:             
-                    val += self.travelAgRecursive_multitarget_conjunction(v,self.path)
-                elif v.id == 106: #in this moment id == 106 represent decoy server
-                    self.allpath.append(path[:])                            
+                if v.target != True:             
+                    val += self.travelAgRecursive_multitarget_conjunction(v,self.path)                          
                 else:
+                    if v.type == True:
 #                     print(v.name)
-                    self.multi_cunt +=1
+                        self.multi_cunt_real +=1
+                    else:
+                        self.multi_cunt_decoy +=1    
 #                     print(self.multi_cunt)       
-                    if self.multi_cunt < self.multi_num:#if there are not enough targets then recurse again
+                    if self.multi_cunt_real < self.multi_num and self.multi_cunt_decoy < self.multi_num:#if there are not enough targets then recurse again
                         val += self.travelAgRecursive_multitarget_conjunction(v,self.path)
-                    elif self.multi_cunt >= 2:
+                    else:
                         self.allpath.append(path[:])    
                         
                 self.path.pop() 
                 v.inPath = 0
                 
             #rebuild the initialized recoded index
-            self.multi_cunt = 0
-                
+            self.multi_cunt_real = 0
+            self.multi_cunt_decoy = 0    
         return val
     
     def travelAgRecursive_multitarget_disjunction(self, u, path):
@@ -225,10 +227,8 @@ class ag(network):
                 v.inPath = 1
                 #print(self.path)
                 #Recursively traverse the path until to the end point
-                if v.target != True and v.id != 106:              
-                    val += self.travelAgRecursive_multitarget_disjunction(v, self.path) 
-                elif v.id == 106: #in this moment id == 106 represent decoy server
-                    self.allpath.append(path[:])                            
+                if v.target != True:              
+                    val += self.travelAgRecursive_multitarget_disjunction(v, self.path)                            
                 else:
                     #this function mainly focus on the all path attribute to calculate the attack path
                     self.allpath.append(path[:])
@@ -236,7 +236,8 @@ class ag(network):
                 v.inPath = 0
 
         return val
-    total_val = 0
+    total_real_val = 0 # real node  accumulated metrics value
+    total_decoy_val = 0
     def travelAgRecursive_multitarget_dynamic(self, u, path):
         val = 0  
         
@@ -253,19 +254,21 @@ class ag(network):
                 self.path.append(v)
                 v.inPath = 1
                 #print(self.path)
-                if v.target != True and v.id != 106:               
-                    val += self.travelAgRecursive_multitarget_dynamic(v, self.path)   
-                elif v.id == 106: #in this moment id == 106 represent decoy server
-                    self.allpath.append(path[:])                         
+                if v.target != True:               
+                    val += self.travelAgRecursive_multitarget_dynamic(v, self.path)                          
                 else:
-                    self.total_val += v.val
-                    if self.total_val > 0.4: #for this moment only for testing multi target mode, the total_val > 0.04 is meaningless, it should be added more accurate attribute ex.critical_level replace.
+                    if v.type == True:
+                        self.total_real_val += v.val
+                    else:
+                        self.total_decoy_val += v.val
+                    if self.total_real_val > 1.7 or self.total_decoy_val > 1.7: #for this moment only for testing multi target mode, the total_val > 0.04 is meaningless, it should be added more accurate attribute ex.critical_level replace.
                         self.allpath.append(path[:])
                     else:
                         val += self.travelAgRecursive_multitarget_dynamic(v, self.path) 
                 self.path.pop() 
                 v.inPath = 0
-
+                self.total_real_val = 0
+                self.total_decoy_val = 0
         return val
     
         #Traverse graph to get attack paths(working for multi target scenarios)

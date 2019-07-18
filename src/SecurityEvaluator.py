@@ -138,7 +138,7 @@ def compute_multitargetfix1_MTTSF(harm):
 #                     multi-target area (fixed 4 target or )   
                     MTTSF += MTTC
                     
-                    if node.target == True:
+                    if node.target == True and node.type == True:
                         break_flag = True
                         break
                     
@@ -171,18 +171,12 @@ def compute_multitargetfix2_MTTSF(harm):
                     MTTC= computeNodeMTTC_multitarget(node)            
                     MTTSF += MTTC
 
-                    if node.target == True:
+                    if node.target == True and node.type == True:
                         flag_score += 1   
                     if flag_score >= 2:
 #                         print("conjunction attack success MTTSF:" + str(MTTSF) )
-                        flag = True
-                    else:
-                        flag = False 
-                        
-                    if flag == True:
                         break_flag = True
                         break
-                    
             #Exit outer loop
         if break_flag == True:
             break
@@ -213,7 +207,8 @@ def compute_multitargetdynamic_MTTSF(harm):
                     MTTC= computeNodeMTTC_multitarget(node)
                     #multi target area (accumulation)    
                     MTTSF += MTTC
-                    total_val += node.val
+                    if node.type == True: #only evaluating the compromising degree of real nodel
+                        total_val += node.val
                     #print(float(totalCount/totalNo))
                     if total_val >= 0.4:
                         break_flag = True

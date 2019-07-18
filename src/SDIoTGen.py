@@ -195,6 +195,27 @@ def add_decoy_vul(node):
         createVulsWithoutType(node, 0.042, 1, "CVE-2016-1962")
         thresholdPri(node, 1)
         terminalPri(node, 1)
+    elif 'laptop' in node.name:
+        
+        #https://nvd.nist.gov/vuln/detail/CVE-2008-3175
+        #Score： 10.0
+        createVulsWithoutType(node, 0.042, 1, "CVE-2008-3175")
+        createVulsWithoutType(node, 0.042, 1, "CVE-2007-5003")
+        #https://nvd.nist.gov/vuln/detail/CVE-2018-8345
+            #Exploitability score: 4.9
+        createVulsWithoutType(node, 0.004, 1, "CVE-2018-8345")
+        thresholdPri(node, 1)
+        terminalPri(node, 1)
+    elif 'thermostat' in node.name:
+        #https://nvd.nist.gov/vuln/detail/CVE-2013-4860
+        createVulsWithoutType(node, 0.006, 1, "CVE-2013-4860")
+        
+        createVulsWithoutType(node, 0.003, 1, "CVE-2018-11315")
+        createVulsWithoutType(node, 0.002, 1, "CVE-2018-3201")
+
+        thresholdPri(node, 1)
+        terminalPri(node, 1)
+        
         
     return None
 """
@@ -251,7 +272,8 @@ def add_decoy_deployment(net, info):
         #print(name, vlan)
         dnode = decoyNode(name+str(i+1)) 
         dnode.subnet = vlan #number of vlan
-        
+        if id ==100 or id ==102 or id == 106: #setting for multi target decoy 
+            dnode.target = True
         dnode.id= id
         add_decoy_type(dnode, info)
         add_decoy_vul(dnode)

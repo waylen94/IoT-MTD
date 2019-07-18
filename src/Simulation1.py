@@ -198,9 +198,9 @@ def adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, file_name, mod
  
 if __name__ == '__main__':
     
-    multitarget_model = "conjunction"
+    #multitarget_model = "conjunction"
     #multitarget_model = "disjunction"
-    #multitarget_model = "dynamic"
+    multitarget_model = "dynamic"
 
 
     num = {"thermostat":2, "laptop":2, "tv":2, "server":1}  #number of decoy nodes

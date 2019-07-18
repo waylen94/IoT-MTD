@@ -15,7 +15,7 @@ def decoyPath(h):
     rsum = 0
     
     for path in h.model.allpath:
-        if 'decoy_server' in path[len(path)-1].name:
+        if 'decoy' in path[len(path)-1].name:
             dsum += 1
         elif 'server' in path[len(path)-2].name:
             rsum += 1
