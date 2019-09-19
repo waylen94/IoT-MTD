@@ -50,33 +50,85 @@ def add_vul(net):
             #https://nvd.nist.gov/vuln/detail/CVE-2018-8308
             #Exploitability score: 6.8
             node.score = 6.8
+            #CVSS v3.0 Severity and Metrics 
+            #Impact Score: 5.9 
+            #Exploitability Score: 0.7
+            node.impact = 5.9
+            node.exploitability = 0.7
+            
             createVulsWithoutType(node, 0.006, 1, "CVE-2018-8308") 
         elif 'thermostat' in node.name:
-            #https://nvd.nist.gov/vuln/detail/CVE-2013-4860
+            #https://nvd.nist.gov/vuln/detail/CVE-2013-11315
             node.score = 6
+            
+            #CVSS v3.0 Severity and Metrics 
+            #Impact Score: 0
+            #Exploitability Score: 0
+            #there is no cvss3.0 statistics 0 replaced
+            node.impact = 3.6
+            node.exploitability = 2.8
+            
+            
             createVulsWithoutType(node, 0.006, 1, "CVE-2013-4860")
         elif 'meter' in node.name:
             #https://nvd.nist.gov/vuln/detail/CVE-2017-9944
             #Exploitability score: 10.0
+            
+            #CVSS v3.0 Severity and Metrics 
+            #Impact Score: 5.9 
+            #Exploitability Score: 3.9
+            node.impact = 5.9
+            node.exploitability = 3.9
+            
             node.score = 10
             createVulsWithoutType(node, 0.042, 1, "CVE-2017-9944")     
         elif 'camera' in node.name:
             node.score = 10
             #https://nvd.nist.gov/vuln/detail/CVE-2018-10660
+            
+            #CVSS v3.0 Severity and Metrics 
+            #Impact Score: 5.9 
+            #Exploitability Score: 3.9
+            node.impact = 5.9
+            node.exploitability = 3.9
             createVulsWithoutType(node, 0.042, 1, "CVE-2018-10660")     
+            
         elif 'tv' in node.name:
             #https://nvd.nist.gov/vuln/detail/CVE-2018-4094
             #Exploitability score: 8.6
+            node.score = 8.6
+            
+            #CVSS v3.0 Severity and Metrics 
+            #Impact Score: 5.9 
+            #Exploitability Score: 1.8
+            node.impact = 5.9
+            node.exploitability = 1.8
+            
             createVulsWithoutType(node, 0.012, 1, "CVE-2018-4094")
         elif 'laptop' in node.name:
             node.score = 4.9
             #https://nvd.nist.gov/vuln/detail/CVE-2018-8345
             #Exploitability score: 4.9
+            
+            #CVSS v3.0 Severity and Metrics 
+            #Impact Score: 5.9 
+            #Exploitability Score: 1.6
+            node.impact = 5.9
+            node.exploitability = 1.6
+            
             createVulsWithoutType(node, 0.004, 1, "CVE-2018-8345")     
         elif 'server' in node.name:
             node.score = 7
             #https://nvd.nist.gov/vuln/detail/CVE-2018-8273
+            
+            #CVSS v3.0 Severity and Metrics 
+            #Impact Score: 5.9 
+            #Exploitability Score: 3.9
+            node.impact = 5.9
+            node.exploitability = 3.9
+            
             createVulsWithoutType(node, 0.006, 1, "CVE-2018-8273")                  
+            
 
     return None
 
@@ -101,12 +153,16 @@ def createRealSDIoT(node_vlan_list):
             iot = realNode(j)
             iot.id = id
             iot.subnet = vlan
-            if iot.subnet == 'vlan4':
-                iot.critical = True
-                iot.target = True
+#             if iot.subnet == 'vlan4':
+#                 iot.critical = True
+#                 iot.target = True
             net.nodes.append(iot)
-            if id == 3 or id == 7 or id == 8: #when id == 8 which is the traditonal server 
+            if id == 3 or id == 7: #when id == 8 which is the traditonal server 
                 iot.target = True
+                print("Target have arranged to: "+ iot.name)
+            if id == 8: #when id == 8 which is the traditonal server 
+                iot.target = True
+                print("Target have arranged to: "+ iot.name)
             id += 1
         
         net.subnets.append(vlan)
@@ -248,7 +304,11 @@ def check_decoy_type(dimension, decoy_num, decoy_list):
 dealing with decoy node type
 """
 def add_decoy_type(node, info):
-    if "server" in node.name:
+#     if "server" in node.name:
+#         print("Real-os Decoy target deployed to: " +node.name)
+#         node.type = info["server_decoy_type"]
+    if node.target is True:
+        print("Real-os Decoy target deployed to: "+node.name)
         node.type = info["server_decoy_type"]
     else:
         node.type = "emulated"
@@ -284,7 +344,11 @@ def add_decoy_deployment(net, info):
         #print(name, vlan)
         dnode = decoyNode(name+str(i+1)) 
         dnode.subnet = vlan #number of vlan
-        if id ==100 or id ==102 or id == 106: #setting for multi target decoy 
+        if id == 100 or id == 102 : #setting for multi target decoy  102
+            print("Decoy targets deployed to: "+ dnode.name)
+            dnode.target = True
+        if id == 106: #setting for multi target decoy 
+            print("Decoy targets deployed to: "+ dnode.name)
             dnode.target = True
         dnode.id= id
         add_decoy_type(dnode, info)

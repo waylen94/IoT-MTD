@@ -27,6 +27,9 @@ class node(object):
         self.target = False
         self.id = 550 #initial for start and end testing
         self.score = 0 #vulnerability base score for multi target dynamic testing
+        
+        self.impact = 0 #CVSS v3.0 Severity and Metrics defined in vulnerability deployment procedure
+        self.exploitability = 0  #CVSS v3.0 Severity and Metrics defined in vulnerability deployment procedure
 
     #Set the node as normal/start/end
     def setStart(self):

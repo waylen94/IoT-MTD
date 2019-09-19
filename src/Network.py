@@ -132,6 +132,8 @@ def computeNeighbors(net):
                 neighbor_list.append(node)
     return neighbor_list
 
+
+
 def checkNeighbors(compNodes, neighbor_list):
     compNo = 0
     for node in compNodes:
@@ -140,3 +142,10 @@ def checkNeighbors(compNodes, neighbor_list):
                 compNo += 1
     #print("Number of compromised neighbors: ", compNo)
     return compNo
+
+def assignCompNodeInNet(decoy_net, attack_node):
+    for node in decoy_net.nodes:
+        if attack_node.name == "ag_"+node.name:
+#             print("Assign compromised node in original net: ", node.name, attack_node.name)
+            node.comp = True
+    return None

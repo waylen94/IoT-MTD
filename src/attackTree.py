@@ -139,9 +139,6 @@ class at(object):
             self.targetOut(self.topGate, e)
             # foldgate
             self.foldgate(self.topGate)
-            
-            
-            
 
     #Simplify the method initiating the and gate and or gate with created network node
     def simplify(self, gate, history, target):
@@ -151,10 +148,10 @@ class at(object):
         tGate.extend(gate.con)#attack tree storing for network node connection for building the attack tree (and or)
         
         value = 1
-        if len(tGate) == 0: #recursive function point in context when the gate soted the target the value will be 0
+        if len(tGate) == 0: #recursive function point in context when the gate stopped the target the value will be 0
             value = 0
            
-        for item in tGate:    #t attribute only cater for attack tree for discriminate normal node, and or node and 
+        for item in tGate:    #t attribute only cater for attack tree for discriminate normal node, and or node
             if (item is not target) and (item.t is "node"):
                 a_gate = andGate()                                
                 gate.con.append(a_gate)
@@ -185,7 +182,7 @@ class at(object):
                 
                   
         return value
-    
+        
     def targetOut(self, rootGate, target):
         """explanation of the function"""
         self.targetOutRecursive(rootGate, target)
