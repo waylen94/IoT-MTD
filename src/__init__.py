@@ -42,9 +42,9 @@ def parse_solution_set(net, solution_set):
 
 def draw_diagram(y_label,file_name,draw_color,performance,prefix):
     
-    objects = ('','FS-RNT(S)','AS-RNT(S)','FS-RNT(M)','AS-RNT(M)','')
-    y_pos = np.arange(len(objects))
-    performance = [0,performance[0],performance[1],performance[2],performance[3],0]
+    objects = ('FS-RNT(S)','AS-RNT(S)','FS-RNT(M)','AS-RNT(M)')
+    y_pos = [2,4,6,8]
+    performance = [performance[0],performance[1],performance[2],performance[3]]
     plt.figure(figsize=(6,6))
     plt.bar(y_pos, performance, width = 0.6, color = draw_color, align = "center")
     plt.xticks(y_pos, objects,fontsize=10)
@@ -85,20 +85,24 @@ def network_diagram_generation():
     #dodgeblue orange brown darkseagreen crimson
         
 if __name__ == '__main__':
+    """
+    Json generator
     
-    network_diagram_generation()
+    """
+#     network_diagram_generation()
     
-#     list_y_label = ['Average PDP','Average MTTSF', 'Average DC per time unit',
-#                     'Average AIM', 'Average AE']
-#     list_file_name = ["Proportion_of_decoy_paths_among_attack_paths","Average_MTTSF","Average_defense_cost_per_time_unit",
-#                       "Average_degree_of_attack_impact","Average_attack_exploitability"]
-#     list_color = ["dodgerblue","orange","brown","darkseagreen","crimson"]
-#     
-#     performance = [[0.791,0.794,0.795,0.795],[478,579,507,634],[2.04,0.63,2.08,0.58],[15.96,16.35,16.46,17.15],[7.61,7.95,7.86,7.74]]
-#     prefix = "R5_comparison_"
-#     
-#     for i in range(0,5):
-#         draw_diagram(list_y_label[i], list_file_name[i], list_color[i], performance[i],prefix)
+    
+    list_y_label = ['Average PDP','Average MTTSF', 'Average DC per time unit',
+                    'Average AIM', 'Average AE']
+    list_file_name = ["Proportion_of_decoy_paths_among_attack_paths","Average_MTTSF","Average_defense_cost_per_time_unit",
+                      "Average_degree_of_attack_impact","Average_attack_exploitability"]
+    list_color = ["dodgerblue","orange","brown","darkseagreen","crimson"]
+     
+    performance = [[0.791,0.794,0.795,0.795],[478,579,507,634],[2.04,0.63,2.08,0.58],[15.96,16.35,16.46,17.15],[7.61,7.95,7.86,7.74]]
+    prefix = "R5_1_comparison_"
+     
+    for i in range(0,5):
+        draw_diagram(list_y_label[i], list_file_name[i], list_color[i], performance[i],prefix)
 
 """
 

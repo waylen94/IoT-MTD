@@ -8,6 +8,7 @@ from SecurityEvaluator import *
 from RandomShufflingOptimization import *
 from attackTree import *
 from Metrics import attack_exploitability, attack_impact
+from notebook.base.handlers import non_alphanum
 
 #-----------------------------------------------------------------------------
 # Parse solution, save output, calculate metrics
@@ -56,7 +57,7 @@ def cacluateMetrics(initial_net, net, initial_info):
 #     print(rsum)
 #     h.model.printAG()
     for i in range(0, initial_info["simulation"]):
-        
+#         print("simulation times:", i )
         newnet = copyNet(shuffled_net)
         newnet = add_attacker(newnet)
         h = constructHARM(newnet)
@@ -231,6 +232,15 @@ def adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, file
     #Shuffle network when SSL check threshold is met 
     #Stop when either SF1 or SF2 or SSL threshold is met
     
+    #for ssl_threshold == 0.1
+    dpath=0 
+    average_expected_mttsf=0
+    average_expected_ai=0 
+    average_expected_ae = 0
+    defense_cost = 0
+    mttc = 0
+    
+    
     while previous_ssl < ssl_analysis_sensitive:
         ssl, mttc, compNodes, new_decoy_net = computeSSL(h, initial_net, decoy_net, ssl_analysis_sensitive, initial_info["sslThreshold_checkInterval"], 
                                initial_info["threshold"], initial_info["detectionPro"], 
@@ -268,25 +278,48 @@ def adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, file
         previous_ssl = ssl
     print("SSL threshold:"+str(ssl_analysis_sensitive))
     print("Attack intelligence  " + str(initial_info["attackerIntelligence"]["emulated"])+" "+ str(initial_info["attackerIntelligence"]["real"]))
+    if(times == 0):
+        shuffled_net, cost = randomShuffling(new_decoy_net, pro)
+            
+        defense_cost = cost/mttc
+        dpath, average_expected_mttsf, average_expected_ai, average_expected_ae = cacluateMetrics(initial_net, shuffled_net, initial_info)
 
-    print([str(total_dp/times), str(total_mtssf/times), str(total_dc/times), str(total_ai/times), str(total_ae/times)])    
-    return [(total_dp/times),(total_mtssf/times), (total_dc/times),(total_ai/times), (total_ae/times)]
+        sensitive_record.append(average_expected_mttsf)
+        print([str(dpath),str(average_expected_mttsf),str(defense_cost),str(average_expected_ai),str(average_expected_ae)])
+    else:
+        sensitive_record.append(total_mtssf/times)
+        print([str(total_dp/times), str(total_mtssf/times), str(total_dc/times), str(total_ai/times), str(total_ae/times)])    
+        return [(total_dp/times),(total_mtssf/times), (total_dc/times),(total_ai/times), (total_ae/times)]
  
  
  
 if __name__ == '__main__':
     
-    num = {"laptop":2, "thermostat":2, "tv":2, "server":1} #decoy nodes
-    initial_net, decoy_net, decoy_list, initial_info = beforeShuffle(num, "init_decoy_net_metrics")
+#     num = {"laptop":2, "thermostat":2, "tv":2, "server":1} #decoy nodes
+#     initial_net, decoy_net, decoy_list, initial_info = beforeShuffle(num, "init_decoy_net_metrics")
+#     
+#     interval = 24
+#     pro = 0.5   #random shuffling index
+#     times_of_interval = 30
     
-    interval = 24
-    pro = 0.5   #random shuffling index
-    times_of_interval = 30
+#    adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, "adaptive_rs0000000")
+#    fixIntervalRS(initial_net, decoy_net, initial_info, interval, pro, "fix_rs", times_of_interval)
     
-    adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, "adaptive_rs0000000")
-    #fixIntervalRS(initial_net, decoy_net, initial_info, interval, pro, "fix_rs", times_of_interval)
+    
+    sensitive_record = []
+
+    for i in range(1,10):
+        num = {"laptop":2, "thermostat":2, "tv":2, "server":1} #decoy nodes
+        initial_net, decoy_net, decoy_list, initial_info = beforeShuffle(num, "init_decoy_net_metrics")
+        
+        interval = 24
+        pro = 0.5   #random shuffling index
+        times_of_interval = 30
+        adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, "adaptive_rs0000000", i*0.1)
+      
+    print(sensitive_record)  
+      
+      
 
 
-#     for i in range(2,10):
-#         adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, "adaptive_rs0000000", i*0.1)
-#      
+

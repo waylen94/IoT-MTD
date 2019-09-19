@@ -96,7 +96,7 @@ def computeMTTSF(harm, net, cflag):
                     totalCount += count
                     multi_target_total +=multi_target
                     #print(float(totalCount/totalNo))        or (multi_target_total >=2 and flag == True)
-                    if float(totalCount/totalNo) >= cflag or flag == True:
+                    if float(totalCount/totalNo) >= cflag or (multi_target_total >=2 and flag == True):
 #                         print("11111111111111111   "+node.name)
                         break_flag = True
                         break
@@ -105,7 +105,7 @@ def computeMTTSF(harm, net, cflag):
         if break_flag == True:
             testingcount +=1
             break
-#     print(""+str(MTTSF))
+#     print("MTTSF from security evaluator mttsf calculation:    "+str(MTTSF))
     return MTTSF, attack_exploitability, attack_impact, break_flag, testingcount 
 
 def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2, previous_ssl, compNodes):
@@ -142,7 +142,7 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
                     
                     compNeighborNo = checkNeighbors(compNodes, neighbor_list)
                     SSL = w1 * (len(compNodes)/totalNo) + w2 * (compNeighborNo/neighborNo)
-                    print("w1 parameter: ", (len(compNodes)/totalNo),"w2 parameter: ", (compNeighborNo/neighborNo), "SSL: ", SSL)
+#                     print("w1 parameter: ", (len(compNodes)/totalNo),"w2 parameter: ", (compNeighborNo/neighborNo), "SSL: ", SSL)
                     #Exit inner loop
                     if float(totalCount/totalNo) >= cflag or flag == True:
                         SSL = 1.0
