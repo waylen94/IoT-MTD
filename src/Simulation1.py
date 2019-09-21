@@ -58,17 +58,18 @@ def cacluateMetrics(initial_net, net, initial_info):
 #     h.model.printAG()
     for i in range(0, initial_info["simulation"]):
 #         print("simulation times:", i )
-        newnet = copyNet(shuffled_net)
+        newnet = copyNet(net)
         newnet = add_attacker(newnet)
         h = constructHARM(newnet)
         """clean up the compromise items"""
         MTTSF, attack_exploitability, attack_impact , flag, attackcount = computeMTTSF(h, initial_net, initial_info["threshold"])
+        
         expected_mttsf +=MTTSF
         expected_ae +=attack_exploitability
         expected_ai +=attack_impact
         total_attack_count += attackcount
         
-#         print(str(attack_impact) +"  "+ str(MTTSF) + str(flag))
+#         print(str(attack_impact) +"  "+ "MTTSF     "+ str(MTTSF) + str(flag))
 #         print(expected_ai)
         
 #     print(total_attack_count)
@@ -242,12 +243,14 @@ def adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, file
     
     
     while previous_ssl < ssl_analysis_sensitive:
+        
         ssl, mttc, compNodes, new_decoy_net = computeSSL(h, initial_net, decoy_net, ssl_analysis_sensitive, initial_info["sslThreshold_checkInterval"], 
                                initial_info["threshold"], initial_info["detectionPro"], 
                                initial_info["weights"][0], initial_info["weights"][1], 
                                previous_ssl, compNodes)
         
         totalMTTC += mttc
+        
         if ssl < ssl_analysis_sensitive:
             
             shuffled_net, cost = randomShuffling(new_decoy_net, pro)
@@ -266,9 +269,9 @@ def adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, file
             
             
             if previous_ssl == 0:
-                saveOutput(file_name, 'w', [str(totalMTTC), str(dpath), str(average_expected_mttsf), str(defense_cost), str(average_expected_ai), str(average_expected_ae)])
+                saveOutput(file_name+str(ssl_analysis_sensitive), 'w', [str(totalMTTC), str(dpath), str(average_expected_mttsf), str(defense_cost), str(average_expected_ai), str(average_expected_ae)])
             else:
-                saveOutput(file_name, 'a+', [str(totalMTTC), str(dpath), str(average_expected_mttsf), str(defense_cost), str(average_expected_ai), str(average_expected_ae)])
+                saveOutput(file_name+str(ssl_analysis_sensitive), 'a+', [str(totalMTTC), str(dpath), str(average_expected_mttsf), str(defense_cost), str(average_expected_ai), str(average_expected_ae)])
                 
             decoy_net = copyNet(shuffled_net)
             newnet = copyNet(decoy_net)
@@ -277,17 +280,27 @@ def adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, file
         
         previous_ssl = ssl
     print("SSL threshold:"+str(ssl_analysis_sensitive))
-    print("Attack intelligence  " + str(initial_info["attackerIntelligence"]["emulated"])+" "+ str(initial_info["attackerIntelligence"]["real"]))
+#     print("Attack intelligence  " + str(initial_info["attackerIntelligence"]["emulated"])+" "+ str(initial_info["attackerIntelligence"]["real"]))
     if(times == 0):
         shuffled_net, cost = randomShuffling(new_decoy_net, pro)
             
         defense_cost = cost/mttc
         dpath, average_expected_mttsf, average_expected_ai, average_expected_ae = cacluateMetrics(initial_net, shuffled_net, initial_info)
 
-        sensitive_record.append(average_expected_mttsf)
+        sensitive_record[0].append(dpath)
+        sensitive_record[1].append(average_expected_mttsf)
+        sensitive_record[2].append(defense_cost)
+        sensitive_record[3].append(average_expected_ai)
+        sensitive_record[4].append(average_expected_ae)
+        
         print([str(dpath),str(average_expected_mttsf),str(defense_cost),str(average_expected_ai),str(average_expected_ae)])
     else:
-        sensitive_record.append(total_mtssf/times)
+        sensitive_record[0].append(total_dp/times)
+        sensitive_record[1].append(total_mtssf/times)
+        sensitive_record[2].append(total_dc/times)
+        sensitive_record[3].append(total_ai/times)
+        sensitive_record[4].append(total_ae/times)
+        
         print([str(total_dp/times), str(total_mtssf/times), str(total_dc/times), str(total_ai/times), str(total_ae/times)])    
         return [(total_dp/times),(total_mtssf/times), (total_dc/times),(total_ai/times), (total_ae/times)]
  
@@ -306,7 +319,7 @@ if __name__ == '__main__':
 #    fixIntervalRS(initial_net, decoy_net, initial_info, interval, pro, "fix_rs", times_of_interval)
     
     
-    sensitive_record = []
+    sensitive_record = [[],[],[],[],[]]
 
     for i in range(1,10):
         num = {"laptop":2, "thermostat":2, "tv":2, "server":1} #decoy nodes
@@ -317,7 +330,11 @@ if __name__ == '__main__':
         times_of_interval = 30
         adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, "adaptive_rs0000000", i*0.1)
       
-    print(sensitive_record)  
+    print(sensitive_record[0])  
+    print(sensitive_record[1]) 
+    print(sensitive_record[2]) 
+    print(sensitive_record[3]) 
+    print(sensitive_record[4]) 
       
       
 

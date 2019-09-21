@@ -119,7 +119,8 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
     shuffle(harm.model.allpath)  
     #harm.model.printPath()
     #print("number of attack paths:", len(harm.model.allpath)) 
-        
+    
+    multi_target_total = 0    
     totalCount = 0
     totalTime = 0
     neighbor_list = computeNeighbors(net)
@@ -128,23 +129,25 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
     break_flag = False
 #     compNodes = []
 #     SSL = 0
+    
     for path in harm.model.allpath:
         for node in path:
             if node is not harm.model.s and node is not harm.model.e:
                 if node.val > 0 and node.comp == False:
-                    MTTC, flag = computeCompNodes(node, detect_pro) 
+                    MTTC, count, flag , multi_target= computeNodeMTTC(node) 
                     compNodes.append(node)
                     assignCompNodeInNet(decoy_net, node)
                     totalTime += MTTC
                     totalCount += 1
+                    multi_target_total +=multi_target
 #                     print("SF1: ", float(totalCount/totalNo))
 #                     print("SF2: ", flag)
                     
                     compNeighborNo = checkNeighbors(compNodes, neighbor_list)
                     SSL = w1 * (len(compNodes)/totalNo) + w2 * (compNeighborNo/neighborNo)
-#                     print("w1 parameter: ", (len(compNodes)/totalNo),"w2 parameter: ", (compNeighborNo/neighborNo), "SSL: ", SSL)
+                    print("w1 parameter: ", (len(compNodes)/totalNo),"w2 parameter: ", (compNeighborNo/neighborNo), "SSL: ", SSL)
                     #Exit inner loop
-                    if float(totalCount/totalNo) >= cflag or flag == True:
+                    if float(totalCount/totalNo) >= cflag or  (multi_target_total >=2 and flag == True):
                         SSL = 1.0
                         break_flag = True
                         break

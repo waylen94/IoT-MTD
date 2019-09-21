@@ -159,10 +159,10 @@ def createRealSDIoT(node_vlan_list):
             net.nodes.append(iot)
             if id == 3 or id == 7: #when id == 8 which is the traditonal server 
                 iot.target = True
-                print("Target have arranged to: "+ iot.name)
+#                 print("Target have arranged to: "+ iot.name)
             if id == 8: #when id == 8 which is the traditonal server 
                 iot.target = True
-                print("Target have arranged to: "+ iot.name)
+#                 print("Target have arranged to: "+ iot.name)
             id += 1
         
         net.subnets.append(vlan)
@@ -308,7 +308,7 @@ def add_decoy_type(node, info):
 #         print("Real-os Decoy target deployed to: " +node.name)
 #         node.type = info["server_decoy_type"]
     if node.target is True:
-        print("Real-os Decoy target deployed to: "+node.name)
+#         print("Real-os Decoy target deployed to: "+node.name)
         node.type = info["server_decoy_type"]
     else:
         node.type = "emulated"
@@ -345,10 +345,10 @@ def add_decoy_deployment(net, info):
         dnode = decoyNode(name+str(i+1)) 
         dnode.subnet = vlan #number of vlan
         if id == 100 or id == 102 : #setting for multi target decoy  102
-            print("Decoy targets deployed to: "+ dnode.name)
+#             print("Decoy targets deployed to: "+ dnode.name)
             dnode.target = True
         if id == 106: #setting for multi target decoy 
-            print("Decoy targets deployed to: "+ dnode.name)
+#             print("Decoy targets deployed to: "+ dnode.name)
             dnode.target = True
         dnode.id= id
         add_decoy_type(dnode, info)
