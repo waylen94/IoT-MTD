@@ -198,6 +198,7 @@ def adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, file_name):
             h = constructHARM(newnet)                           
         
         previous_ssl = ssl
+        
     print("SSL threshold:"+str(initial_info["sslThreshold"]))
     print("Attack intelligence  " + str(initial_info["attackerIntelligence"]["emulated"])+" "+ str(initial_info["attackerIntelligence"]["real"]))
 
