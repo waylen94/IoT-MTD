@@ -127,25 +127,31 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
     neighborNo = len(neighbor_list)
 #     print("Neighbor list: ", [i.name for i in neighbor_list])
     break_flag = False
-#     compNodes = []
-#     SSL = 0
+    compNodes = []
+    SSL = 0
+    compNeighborNo = 0
+    
     
     for path in harm.model.allpath:
         for node in path:
             if node is not harm.model.s and node is not harm.model.e:
                 if node.val > 0 and node.comp == False:
-                    MTTC, count, flag , multi_target= computeNodeMTTC(node) 
-                    compNodes.append(node)
+                    MTTC, count, flag , multi_target= computeNodeMTTC(node)
+                    if count == 1: 
+                        compNodes.append(node)
+                        
                     assignCompNodeInNet(decoy_net, node)
+                    
                     totalTime += MTTC
-                    totalCount += 1
-                    multi_target_total +=multi_target
+                    totalCount += count
+                    multi_target_total +=multi_target # sum the multi target compromised number
 #                     print("SF1: ", float(totalCount/totalNo))
 #                     print("SF2: ", flag)
                     
                     compNeighborNo = checkNeighbors(compNodes, neighbor_list)
-                    SSL = w1 * (len(compNodes)/totalNo) + w2 * (compNeighborNo/neighborNo)
-                    print("w1 parameter: ", (len(compNodes)/totalNo),"w2 parameter: ", (compNeighborNo/neighborNo), "SSL: ", SSL)
+                    #len(compNodes) is similar to totalCount
+                    SSL = (w1 * (len(compNodes)/totalNo)) + (w2 * (compNeighborNo/neighborNo))
+                    
                     #Exit inner loop
                     if float(totalCount/totalNo) >= cflag or  (multi_target_total >=2 and flag == True):
                         SSL = 1.0
@@ -157,7 +163,10 @@ def computeSSL(harm, net, decoy_net, thre, thre_check, cflag, detect_pro, w1, w2
                     elif (SSL - previous_ssl) > thre_check and SSL < thre:
                         break_flag = True
                         break
+        print("w1 parameter: ", (len(compNodes)/totalNo),"w2 parameter: ", (compNeighborNo/neighborNo), "Break point SSL: ", SSL)
+                  
         #Exit outer loop
+        
         if break_flag == True:
             break
 #     print("MTTC: ", totalTime)          
