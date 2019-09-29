@@ -52,3 +52,32 @@ def attack_impact(h):
     attack_impact_sum = 0 
     
     return attack_impact_sum
+
+
+#====================================================================================
+#Normalize metric values
+#====================================================================================
+def nomalizeMetrics(metric_list, normalized_range):
+    normalized_value_list = []
+    min_value = normalized_range[0]
+    max_value = normalized_range[1]
+    for i in metric_list:
+        temp = float(i - min_value)/float(max_value - min_value)
+        normalized_value_list.append(temp)
+    return normalized_value_list
+
+
+#====================================================================================
+#Compute the cost of solutions
+#====================================================================================
+def solutionCost(candidate_solution, info):
+    """
+    Calculate the total cost of deployed solutions: connections
+    """
+    total_cost = info["riot_num"] * (info["diot_dimension"] + info["dserver_dimension"])
+    solution_cost = 0.0
+    for i in range(0, total_cost):
+        if candidate_solution[i] != info["previous_solution"][i]: 
+            solution_cost += 1.0
+    
+    return float(total_cost - solution_cost)

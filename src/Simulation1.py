@@ -10,6 +10,10 @@ from attackTree import *
 from Metrics import attack_exploitability, attack_impact
 from notebook.base.handlers import non_alphanum
 
+import inspyred
+import ProblemFormulation as pf
+import timeit
+
 #-----------------------------------------------------------------------------
 # Parse solution, save output, calculate metrics
 #-----------------------------------------------------------------------------
@@ -82,7 +86,12 @@ def cacluateMetrics(initial_net, net, initial_info):
 def beforeShuffle(num, file_name):
     #Create a real network
     node_vlan_list = [['mri', 'ct'], ['thermostat', 'meter', 'camera'], ['tv', 'laptop'], ['server1']]
+#     working on Multi-Target 
     solution_set = {'laptop':num["laptop"], 'thermostat':num["thermostat"], 'tv':num["tv"], 'server':num["server"]}
+
+#    working on GA
+#     solution_set_GA = {'ct':num["ct"], 'camera':num["camera"], 'tv':num["tv"], 'server':num["server"]}
+
     net = createRealSDIoT(node_vlan_list)
     #printNet(net)
 
@@ -304,33 +313,168 @@ def adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, file
         
         print([str(total_dp/times), str(total_mtssf/times), str(total_dc/times), str(total_ai/times), str(total_ae/times)])    
         return [(total_dp/times),(total_mtssf/times), (total_dc/times),(total_ai/times), (total_ae/times)]
- 
- 
- 
-if __name__ == '__main__':
+
+
+def problemGen(solution_set, node_vlan_list, shuffled_net, previous_solution):
+    """
+    Initialize problem.
+    """
+    ct_num, camera_num, tv_num, server_num = add_solution_set(solution_set)
     
+    prob_bi = pf.problemBinary(ct_num + camera_num + tv_num + server_num, 3)
+    
+    prob_bi.generate_net(node_vlan_list)  
+    
+    iot_num = getIoTNum(prob_bi.net)
+
+    #print(iot_num)
+    decoy_iot_num = ct_num + camera_num + tv_num
+    prob_bi.info = {"diot_dimension": decoy_iot_num, "dserver_dimension": server_num, "decoy_list": ["decoy_ct", "decoy_camera", "decoy_tv", "decoy_server"], 
+                    "decoy_num": [ct_num, camera_num, tv_num, server_num], "riot_num": iot_num, "attackerIntelligence": {'emulated': 0.9, 'real': 1.0},
+                    "threshold": float(1.0/3.0), 
+                    "server_decoy_type": "real",
+                    "parameters": {"size": 10, "generation":10}, 
+                    "normalized_range": [0.0, 8000.0], 
+                    "previous_solution": previous_solution, "simulation": 100}
+
+    prob_bi.assign_dimensions_bits_list([1] * ((decoy_iot_num + server_num) * iot_num))
+    prob_bi.add_real_bounder([1] * ((decoy_iot_num + server_num) * iot_num))
+    prob_bi.calc_bit_length()
+    prob_bi.sim_num = prob_bi.info["simulation"] #For calculation of average expected MTTSF
+    
+    #print(prob_bi.dimension_bits, prob_bi.dimensions, prob_bi.dimensions_bits_list, prob_bi.real_bounder)
+    
+    prob_bi.add_initial_decoy_deployment()
+    prob_bi.decoy_net = copyNet(shuffled_net)
+    
+    return prob_bi
+def runCase(shuffled_net, previous_solution):
+    
+    #Initialize an instance of the random class
+    prng = Random()
+    #Initialize the random number generator
+    #The seed is the current system time
+    prng.seed(time())
+    
+    time_list = {}
+    
+    node_vlan_list = [['mri', 'ct'], ['thermostat', 'meter', 'camera'], ['tv', 'laptop'], ['server1']]
+    solution_set = {'ct':2, 'camera':2, 'tv':2, 'server':1}
+    
+    
+    prob_bi = problemGen(solution_set, node_vlan_list, shuffled_net, previous_solution)
+    
+    start_ea = timeit.default_timer()
+    #Initialize an instance of the NSGA2 class (multi-objective) with a random generator 
+    ea = inspyred.ec.emo.NSGA2(prng)
+    
+    ea.variator = [inspyred.ec.variators.n_point_crossover, 
+                   inspyred.ec.variators.bit_flip_mutation]
+    
+    #Initialize the terminator
+    #Return a Boolean value where True implies that the evolution should end
+    ea.terminator = [#inspyred.ec.terminators.fitness_limit_termination, 
+                     inspyred.ec.terminators.generation_termination]
+    
+    #Perform the evolution
+    #Return a list of individuals contained in the final population  
+    
+    final_pop = ea.evolve(generator=prob_bi.generator, 
+                          evaluator=prob_bi.evaluator, 
+                          pop_size=prob_bi.info["parameters"]["size"],
+                          maximize=prob_bi.maximize, #A flag to denote maximize (here is True)
+                          bounder=prob_bi.bounder, #A basic bounding function (lower bound and upper bound)
+                          max_generations=prob_bi.info["parameters"]["generation"],
+                          crossover_rate=0.8,
+                          mutation_rate=0.2)
+                          
+
+    print("Best archive:", len(ea.archive))
+    print("Final population:", len(final_pop))    
+
+    stop_ea = timeit.default_timer()
+    #print(stop_ea - start_ea)
+        
+    #plot(final_pop, 'full')
+    weights = [1.0/3.0, 1.0/3.0, 1.0/3.0]
+    
+    max_value = 0
+    max_solution = None
+    for f in final_pop:
+        #print(f)
+        #f.candidate
+        
+        normalized_list = nomalizeMetrics([f.fitness[0], f.fitness[1], f.fitness[0]], prob_bi.info["normalized_range"])
+        value = weights[0] * normalized_list[0] + weights[1] * normalized_list[1] + weights[2] * normalized_list[2]
+        if value > max_value:
+            max_normalized_list = normalized_list
+            max_value = value
+            max_solution = f
+    print("optimal solution: ", max_solution, "weighted value: ", max_value) 
+    return max_solution, prob_bi.info
+
+def fixIntervalGA(decoy_net, decoy_list, initial_info, interval, file_name, times):   
+    
+    previous_solution = initial_info["previous_solution"]
+    i = 0
+    
+    while i < times:
+        print("Shuffle time:",  i+1)
+        solution, info = runCase(decoy_net, previous_solution)
+        
+        print("")
+        total_cost = float(info["riot_num"] * (info["diot_dimension"] + info["dserver_dimension"]))
+        
+        defense_cost = float(total_cost - solution.fitness[2])/interval
+        
+        print(solution.candidate, solution.fitness[0], solution.fitness[1], defense_cost)
+        shuffled_net = add_solution(decoy_net, solution.candidate, info, decoy_list)
+        if i == 0:
+            saveOutput(file_name, 'w', [str(interval*(i+1)), str(solution.fitness[0]), str(solution.fitness[1]), str(defense_cost)])
+        else:
+            saveOutput(file_name, 'a+', [str(interval*(i+1)), str(solution.fitness[0]), str(solution.fitness[1]), str(defense_cost)])
+        print("Shuffled net:")
+#         printNetWithVul(shuffled_net)
+        previous_solution = solution.candidate
+        decoy_net = copyNet(shuffled_net)
+        i += 1
+    
+    return None
+
+if __name__ == '__main__':
 #     num = {"laptop":2, "thermostat":2, "tv":2, "server":1} #decoy nodes
 #     initial_net, decoy_net, decoy_list, initial_info = beforeShuffle(num, "init_decoy_net_metrics")
-#     
+#       
 #     interval = 24
 #     pro = 0.5   #random shuffling index
 #     times_of_interval = 30
-    
-#    adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, "adaptive_rs0000000")
-#    fixIntervalRS(initial_net, decoy_net, initial_info, interval, pro, "fix_rs", times_of_interval)
-    
-    
-    sensitive_record = [[],[],[],[],[]]
+    #adaptiveIntervalRS(initial_net, decoy_net, initial_info, pro, "adaptive_rs0000000")
+    #fixIntervalRS(initial_net, decoy_net, initial_info, interval, pro, "fix_rs", times_of_interval)
 
+
+
+#     num = {"ct":2, "camera":2, "tv":2, "server":1,"laptop":0,"thermostat":0}
+#     initial_net, decoy_net, decoy_list, initial_info = beforeShuffle(num, "init_decoy_net_metrics")
+#     
+#     interval = 5
+#     pro = 0.5
+#     times_of_interval = 5
+#     fixIntervalGA(decoy_net, decoy_list, initial_info, interval, "fix_ga", times_of_interval)
+    
+    
+    
+
+    sensitive_record = [[],[],[],[],[]]
+ 
     for i in range(1,10):
         num = {"laptop":2, "thermostat":2, "tv":2, "server":1} #decoy nodes
         initial_net, decoy_net, decoy_list, initial_info = beforeShuffle(num, "init_decoy_net_metrics")
-        
+         
         interval = 24
         pro = 0.5   #random shuffling index
         times_of_interval = 30
         adaptiveIntervalRS_sensitive(initial_net, decoy_net, initial_info, pro, "adaptive_rs0000000", i*0.1)
-      
+       
     print(sensitive_record[0])  
     print(sensitive_record[1]) 
     print(sensitive_record[2]) 

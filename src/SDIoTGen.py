@@ -178,7 +178,10 @@ return number of decoy nodes
 """
 def add_solution_set(solution_set):
     return solution_set['laptop'], solution_set['thermostat'], solution_set['tv'], solution_set['server']
+
 """
+
+
 return number of real nodes
 """
 def getIoTNum(net):
@@ -366,3 +369,43 @@ def add_decoy_deployment(net, info):
     #printNetWithVul(decoy_net)
     
     return decoy_net, temp
+
+
+#=================================================================================================
+# Add solution into network (change connections)
+# If 0 -> 1: add connection
+# If 1 -> 0: remove connection
+# Others: no change
+#=================================================================================================
+
+def add_solution(net, candidate_solution, info, decoy_list):
+    """
+    Interpret solution to add connections.
+    """
+    newNet = copyNet(net)
+    temp = decoy_list
+    #Locate the decoy nodes from the newly created network
+    for node1 in newNet.nodes:
+        if node1.name in decoy_list:
+            temp[decoy_list.index(node1.name)] = node1
+
+    #Add or remove connections from real IoT nodes to decoys
+    for i in range(0, info["diot_dimension"]+info["dserver_dimension"]):    
+        num = i * info["riot_num"]
+        dnode = temp[i]
+        #print(dnode.name)
+        for j in range(1, info["riot_num"]+1):
+            #print(candidate_solution[num+j-1])
+            if candidate_solution[num+j-1] == 1 and info["previous_solution"][num+j-1] == 0:
+                for node2 in newNet.nodes:
+                    if node2.id == j:
+                        connectOneWay(node2, dnode)
+            elif candidate_solution[num+j-1] == 0 and info["previous_solution"][num+j-1] == 1:
+                for node2 in newNet.nodes:
+                    if node2.id == j:
+                        disconnectOneWay(node2, dnode)
+                        
+    #print("Connection changes:")
+    #printNetWithVul(newNet)
+
+    return newNet

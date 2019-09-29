@@ -35,7 +35,9 @@ def plot_measure_single(measure, ylabel, mark):
     return None
 
 
+mark_list = ['v','P','s','*','d']
 def plot_measure_multiple(measure, ylabel, mark,file_name,list_color):
+    scatter_list = []
     _, ax = plt.subplots(figsize=(20, 10.0))
     index = np.arange(len(label))
     for i in range(len(measure)):
@@ -43,18 +45,28 @@ def plot_measure_multiple(measure, ylabel, mark,file_name,list_color):
         print(index)
 #         plt.plot(index, measure[i], color='grey', zorder=1, lw=3,label = ylabel[i])
         plt.plot(index, measure[i], zorder=1, lw=3,label = ylabel[i], color = list_color[i])
-        
-        plt.scatter(index, measure[i],  marker=mark, s=800, zorder=2, color = list_color[i])
-    
-        plt.xlabel('SSL Threshold', fontsize=20)
-#         plt.ylabel(ylabel, fontsize=35)
+
+        scatter_list.append(plt.scatter(index, measure[i],  marker=mark_list[i], s=800, zorder=2, color = list_color[i]))
+
+            
+        plt.xlabel('SSL Threshold', fontsize=35)
+        plt.ylabel('Average Metric Value', fontsize=35)
     
         plt.xticks(index, label, fontsize=20)
-        plt.yticks(fontsize=30)
-        
+        plt.yticks(fontsize=20)
 #     plt.ylim(0)
     ax.margins(x = 0.01)
-    ax.legend(fontsize=20);
+#     ax.legend(fontsize=20);
+    plt.legend(scatter_list,
+           ylabel,
+           scatterpoints=1,
+            loc='center right',
+#            ncol=3,
+#             loc='best',
+            markerscale = 0.85,
+           fontsize=20)
+    
+    
     plt.grid()
 #     plt.show()
     plt.savefig("Mix_4_Metrics1"+".png")
